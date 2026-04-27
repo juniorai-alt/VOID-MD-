@@ -41,7 +41,7 @@ async function startBot() {
     console.clear()
     console.log('\n')
     console.log('██╗ ██╗ ██████╗ ██╗██████╗ ███╗ ███╗██████╗ ')
-    console.log('██║ ██║██╔═══██╗██║██╔══██╗ ████╗ ████║██╔══██╗')
+    console.log('██║ ██║██╔═══██╗██║██╔══██╗ ████║██╔══██╗')
     console.log('██║ ██║██║ ██╔████╔██║██║ ██║')
     console.log('╚██╗ ██╔╝██║ ██║██║ ██║╚██╔╝██║██║ ██║')
     console.log(' ╚████╔╝ ╚██████╔╝██║██████╔╝ ██║ ╚═╝ ██║██████╔╝')
@@ -84,7 +84,7 @@ async function startBot() {
       console.log('\n')
       console.log('██╗ ██╗ ██████╗ ██╗██████╗ ███╗ ███╗██████╗ ')
       console.log('██║ ██║██╔═══██╗██║██╔══██╗ ████╗ ████║██╔══██╗')
-      console.log('██║ ██║██║ ██║██║██║ ██╔████╔██║██║ ██║')
+      console.log('██║ ██║██║██║ ██╔████╔██║██║ ██║')
       console.log('╚██╗ ██╔╝██║ ██║██║ ██║╚██╔╝██║██║ ██║')
       console.log(' ╚████╔╝ ╚██████╔╝██║██████╔╝ ██║ ╚═╝ ██║██████╔╝')
       console.log(' ╚═══╝ ╚═════╝ ╚═╝╚═════╝ ╚═╝╚═════╝ ')
@@ -134,13 +134,13 @@ async function startBot() {
       const groupMetadata = await sock.groupMetadata(id)
       for (const user of participants) {
         const text = groupSettings[id].welcome.replace('@user', `@${user.split('@')[0]}`).replace('@group', groupMetadata.subject)
-        await sock.sendMessage(id, { text, mentions: })
+        await sock.sendMessage(id, { text, mentions: [] }) // FIXED
       }
     }
     if (action === 'remove' && groupSettings[id]?.goodbye) {
       for (const user of participants) {
         const text = groupSettings[id].goodbye.replace('@user', `@${user.split('@')[0]}`)
-        await sock.sendMessage(id, { text, mentions: })
+        await sock.sendMessage(id, { text, mentions: [] }) // FIXED
       }
     }
   })
@@ -362,7 +362,7 @@ async function startBot() {
         const user = m.mentionedJid[0] || m.quoted?.sender || sender
         try {
           const pp = await sock.profilePictureUrl(user, 'image')
-          await sock.sendMessage(sender, { image: { url: pp }, caption: `🖼️ @${user.split('@')[0]}` }, { mentions: })
+          await sock.sendMessage(sender, { image: { url: pp }, caption: `🖼️ @${user.split('@')[0]}` }, { mentions: [] }) // FIXED
         } catch { reply('❌ No DP') }
         break
       case 'tourl':
