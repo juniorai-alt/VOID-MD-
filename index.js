@@ -1,3 +1,8 @@
+// ===== CRYPTO FIX FOR NODE 18+ ON RENDER =====
+const { webcrypto } = require('crypto')
+global.crypto = webcrypto
+// =============================================
+
 const { default: makeWASocket, useMultiFileAuthState, DisconnectReason, downloadMediaMessage } = require('@whiskeysockets/baileys')
 const pino = require('pino')
 const fs = require('fs')
@@ -42,7 +47,7 @@ async function startBot() {
     console.log('\n')
     console.log('██╗ ██╗ ██████╗ ██╗██████╗ ███╗ ███╗██████╗ ')
     console.log('██║ ██║██╔═══██╗██║██╔══██╗ ████║██╔══██╗')
-    console.log('██║ ██║██║ ██╔████╔██║██║ ██║')
+    console.log('██║ ██║██║██║ ██╔████╔██║██║ ██║')
     console.log('╚██╗ ██╔╝██║ ██║██║ ██║╚██╔╝██║██║ ██║')
     console.log(' ╚████╔╝ ╚██████╔╝██║██████╔╝ ██║ ╚═╝ ██║██████╔╝')
     console.log(' ╚═══╝ ╚═════╝ ╚═╝╚═════╝ ╚═╝╚═════╝ ')
@@ -83,7 +88,7 @@ async function startBot() {
     if (connection === 'open') {
       console.log('\n')
       console.log('██╗ ██╗ ██████╗ ██╗██████╗ ███╗ ███╗██████╗ ')
-      console.log('██║ ██║██╔═══██╗██║██╔══██╗ ████╗ ████║██╔══██╗')
+      console.log('██║ ██║██╔═══██╗██║██╔══██╗ ████║██╔══██╗')
       console.log('██║ ██║██║██║ ██╔████╔██║██║ ██║')
       console.log('╚██╗ ██╔╝██║ ██║██║ ██║╚██╔╝██║██║ ██║')
       console.log(' ╚████╔╝ ╚██████╔╝██║██████╔╝ ██║ ╚═╝ ██║██████╔╝')
@@ -134,13 +139,13 @@ async function startBot() {
       const groupMetadata = await sock.groupMetadata(id)
       for (const user of participants) {
         const text = groupSettings[id].welcome.replace('@user', `@${user.split('@')[0]}`).replace('@group', groupMetadata.subject)
-        await sock.sendMessage(id, { text, mentions: [] }) // FIXED
+        await sock.sendMessage(id, { text, mentions: [] })
       }
     }
     if (action === 'remove' && groupSettings[id]?.goodbye) {
       for (const user of participants) {
         const text = groupSettings[id].goodbye.replace('@user', `@${user.split('@')[0]}`)
-        await sock.sendMessage(id, { text, mentions: [] }) // FIXED
+        await sock.sendMessage(id, { text, mentions: [] })
       }
     }
   })
@@ -362,7 +367,7 @@ async function startBot() {
         const user = m.mentionedJid[0] || m.quoted?.sender || sender
         try {
           const pp = await sock.profilePictureUrl(user, 'image')
-          await sock.sendMessage(sender, { image: { url: pp }, caption: `🖼️ @${user.split('@')[0]}` }, { mentions: [] }) // FIXED
+          await sock.sendMessage(sender, { image: { url: pp }, caption: `🖼️ @${user.split('@')[0]}` }, { mentions: [] })
         } catch { reply('❌ No DP') }
         break
       case 'tourl':
