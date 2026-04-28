@@ -8,7 +8,7 @@ const express = require('express')
 const app = express()
 const PORT = process.env.PORT || 3000
 app.get('/', (req, res) => res.send('VOID MD v3.0 is running ⚫'))
-app.listen(PORT, () => console.log(`Dummy server listening on ${PORT}`))
+app.listen(PORT, () => console.log(`[SERVER] Dummy server listening on ${PORT}`))
 // =====================================
 
 const { default: makeWASocket, useMultiFileAuthState, DisconnectReason, downloadMediaMessage } = require('@whiskeysockets/baileys')
@@ -37,13 +37,18 @@ const bibleVerses = [{"text":"For I know the plans I have for you, declares the 
 const quranVerses = [{"text":"So verily, with the hardship, there is relief.","ref":"Quran 94:5"},{"text":"And He found you lost and guided you.","ref":"Quran 93:7"},{"text":"Indeed, Allah is with the patient.","ref":"Quran 2:153"},{"text":"And whoever relies upon Allah - then He is sufficient for him.","ref":"Quran 65:3"},{"text":"So remember Me; I will remember you.","ref":"Quran 2:152"},{"text":"My mercy encompasses all things.","ref":"Quran 7:156"},{"text":"And it is He who created the night and the day and the sun and the moon.","ref":"Quran 21:33"},{"text":"Indeed, with hardship comes ease.","ref":"Quran 94:6"},{"text":"Call upon Me; I will respond to you.","ref":"Quran 40:60"},{"text":"And We have certainly created man and We know what his soul whispers to him.","ref":"Quran 50:16"},{"text":"Do not despair of the mercy of Allah.","ref":"Quran 39:53"},{"text":"And whoever fears Allah - He will make for him a way out.","ref":"Quran 65:2"},{"text":"He knows what is in every heart.","ref":"Quran 67:13"},{"text":"And your Lord is going to give you, and you will be satisfied.","ref":"Quran 93:5"},{"text":"Allah does not burden a soul beyond that it can bear.","ref":"Quran 2:286"},{"text":"Say, He is Allah, the One.","ref":"Quran 112:1"},{"text":"Indeed, the mercy of Allah is near to the doers of good.","ref":"Quran 7:56"},{"text":"And whoever puts his trust in Allah, He will be enough for him.","ref":"Quran 65:3"},{"text":"Be patient. Indeed, the promise of Allah is truth.","ref":"Quran 30:60"},{"text":"And He is with you wherever you are.","ref":"Quran 57:4"}]
 
 async function startBot() {
-  // DELETE THIS LINE AFTER FIRST SUCCESSFUL LOGIN
-  if (fs.existsSync('./session')) fs.rmSync('./session', { recursive: true, force: true })
+  console.log('[BOT] Checking session folder...')
+  if (fs.existsSync('./session')) {
+    console.log('[BOT] DELETING OLD SESSION FOR FRESH QR')
+    fs.rmSync('./session', { recursive: true, force: true })
+  } else {
+    console.log('[BOT] No session found - QR will generate')
+  }
 
   const { state, saveCreds } = await useMultiFileAuthState('./session')
   const sock = makeWASocket({
     auth: state,
-    logger: pino({ level: 'silent' }),
+    logger: pino({ level: 'info' }), // Changed to 'info' so you see connection logs
     browser: ['VOID MD', 'Chrome', '3.0']
   })
 
@@ -62,9 +67,20 @@ async function startBot() {
       console.log('\n📱 WhatsApp → Linked Devices → Link a device')
     }
 
+    if (connection === 'connecting') {
+      console.log('[BOT] Connecting to WhatsApp...')
+    }
+
     if (connection === 'close') {
-      const shouldReconnect = lastDisconnect?.error?.output?.statusCode!== DisconnectReason.loggedOut
-      if (shouldReconnect) startBot()
+      const statusCode = lastDisconnect?.error?.output?.statusCode
+      console.log(`[BOT] Connection closed. Status: ${statusCode}`)
+      const shouldReconnect = statusCode!== DisconnectReason.loggedOut
+      if (shouldReconnect) {
+        console.log('[BOT] Reconnecting...')
+        startBot()
+      } else {
+        console.log('[BOT] Logged out. Delete session and restart.')
+      }
     }
     if (connection === 'open') {
       console.log('\n✅═══════════════════════════════════════════════════════════✅')
