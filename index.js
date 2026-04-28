@@ -3,13 +3,13 @@ const { webcrypto } = require('crypto')
 global.crypto = webcrypto
 // =============================================
 
-// ===== DUMMY WEB SERVER FOR RENDER - PREVENTS PORT ERRORS =====
+// ===== DUMMY WEB SERVER FOR RENDER =====
 const express = require('express')
 const app = express()
 const PORT = process.env.PORT || 3000
 app.get('/', (req, res) => res.send('VOID MD v3.0 is running ⚫'))
 app.listen(PORT, () => console.log(`Dummy server listening on ${PORT}`))
-// ============================================================
+// =====================================
 
 const { default: makeWASocket, useMultiFileAuthState, DisconnectReason, downloadMediaMessage } = require('@whiskeysockets/baileys')
 const pino = require('pino')
@@ -17,6 +17,7 @@ const fs = require('fs')
 const os = require('os')
 const fetch = require('node-fetch')
 const FormData = require('form-data')
+const qrcode = require('qrcode-terminal') // NEW - FOR MANUAL QR PRINT
 
 // ===== CONFIG =====
 global.PREFIX = '.'
@@ -43,7 +44,7 @@ async function startBot() {
   const sock = makeWASocket({
     auth: state,
     logger: pino({ level: 'silent' }),
-    printQRInTerminal: true,
+    // printQRInTerminal REMOVED - deprecated
     browser: ['VOID MD', 'Chrome', '3.0']
   })
 
@@ -58,8 +59,8 @@ async function startBot() {
       console.log('\n⚫═══════════════════════════════════════════════════════════⚫')
       console.log('║ 🕳️ VOID MD v3.0 - SCAN QR TO LINK 🕳️ ║')
       console.log('⚫═══════════════════════════════════════════════════════════⚫\n')
-      console.log('📱 WhatsApp → Linked Devices → Link a device')
-      console.log('📷 Scan the QR code below:\n')
+      qrcode.generate(qr, { small: true }) // MANUAL QR PRINT
+      console.log('\n📱 WhatsApp → Linked Devices → Link a device')
     }
 
     if (connection === 'close') {
@@ -384,7 +385,7 @@ async function startBot() {
         const days = Math.floor(uptime / 86400)
         const hours = Math.floor(uptime / 3600) % 24
         const mins = Math.floor(uptime / 60) % 60
-        reply(`*⚡ UPTIME*\n\n${days}d ${hours}h ${mins}m\n\n*No lag. No crash.*`)
+        reply(`*⚡ UPTIME*\n\n${days}d ${hours}h ${mins}m\n*No lag. No crash.*`)
         break
       case 'ping':
         const start = Date.now()
@@ -442,7 +443,6 @@ async function startBot() {
             await sock.sendMessage(groupId, { text: `*📖 VERSE OF THE DAY*\n\n_"${random.text}"_\n\n*— ${random.ref}*\n\nHave a blessed day 🙏` })
           } catch {}
         }
-      }
       scheduleDailyVerse()
     }, timeUntil8AM)
   }
