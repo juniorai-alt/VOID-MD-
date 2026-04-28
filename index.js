@@ -17,7 +17,7 @@ const fs = require('fs')
 const os = require('os')
 const fetch = require('node-fetch')
 const FormData = require('form-data')
-const qrcode = require('qrcode-terminal') // NEW - FOR MANUAL QR PRINT
+const qrcode = require('qrcode-terminal')
 
 // ===== CONFIG =====
 global.PREFIX = '.'
@@ -44,7 +44,6 @@ async function startBot() {
   const sock = makeWASocket({
     auth: state,
     logger: pino({ level: 'silent' }),
-    // printQRInTerminal REMOVED - deprecated
     browser: ['VOID MD', 'Chrome', '3.0']
   })
 
@@ -59,7 +58,7 @@ async function startBot() {
       console.log('\n⚫═══════════════════════════════════════════════════════════⚫')
       console.log('║ 🕳️ VOID MD v3.0 - SCAN QR TO LINK 🕳️ ║')
       console.log('⚫═══════════════════════════════════════════════════════════⚫\n')
-      qrcode.generate(qr, { small: true }) // MANUAL QR PRINT
+      qrcode.generate(qr, { small: true })
       console.log('\n📱 WhatsApp → Linked Devices → Link a device')
     }
 
@@ -443,6 +442,7 @@ async function startBot() {
             await sock.sendMessage(groupId, { text: `*📖 VERSE OF THE DAY*\n\n_"${random.text}"_\n\n*— ${random.ref}*\n\nHave a blessed day 🙏` })
           } catch {}
         }
+      }
       scheduleDailyVerse()
     }, timeUntil8AM)
   }
