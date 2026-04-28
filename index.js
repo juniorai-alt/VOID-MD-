@@ -10,14 +10,13 @@ const os = require('os')
 const fetch = require('node-fetch')
 const FormData = require('form-data')
 
-// ===== CONFIG - CHANGE THESE 5 LINES =====
+// ===== CONFIG =====
 global.PREFIX = '.'
 global.BOT_NAME = 'VOID MD'
 global.CREATOR = 'PRINCE JUNIOR'
-global.OWNER_NUMBER = ['254112843071'] // CHANGE TO YOUR NUMBER WITHOUT +
-global.PHONE_NUMBER = '254114145528' // CHANGE TO YOUR NUMBER FOR PAIR CODE
-global.SUPPORT_GROUP_JID = '120363040563367104@g.us' // GET WITH.jid COMMAND AFTER DEPLOY
-global.SUPPORT_GROUP_CODE = 'F0VqKkKJU2DEo2MbIrCqBV' // ✅ YOUR INVITE CODE
+global.OWNER_NUMBER = ['254112843071']
+global.SUPPORT_GROUP_JID = '120363040563367104@g.us'
+global.SUPPORT_GROUP_CODE = 'F0VqKkKJU2DEo2MbIrCqBV'
 
 // ===== LOAD SETTINGS =====
 let groupSettings = fs.existsSync('./groups.json')? JSON.parse(fs.readFileSync('./groups.json')) : {}
@@ -29,11 +28,14 @@ const bibleVerses = [{"text":"For I know the plans I have for you, declares the 
 const quranVerses = [{"text":"So verily, with the hardship, there is relief.","ref":"Quran 94:5"},{"text":"And He found you lost and guided you.","ref":"Quran 93:7"},{"text":"Indeed, Allah is with the patient.","ref":"Quran 2:153"},{"text":"And whoever relies upon Allah - then He is sufficient for him.","ref":"Quran 65:3"},{"text":"So remember Me; I will remember you.","ref":"Quran 2:152"},{"text":"My mercy encompasses all things.","ref":"Quran 7:156"},{"text":"And it is He who created the night and the day and the sun and the moon.","ref":"Quran 21:33"},{"text":"Indeed, with hardship comes ease.","ref":"Quran 94:6"},{"text":"Call upon Me; I will respond to you.","ref":"Quran 40:60"},{"text":"And We have certainly created man and We know what his soul whispers to him.","ref":"Quran 50:16"},{"text":"Do not despair of the mercy of Allah.","ref":"Quran 39:53"},{"text":"And whoever fears Allah - He will make for him a way out.","ref":"Quran 65:2"},{"text":"He knows what is in every heart.","ref":"Quran 67:13"},{"text":"And your Lord is going to give you, and you will be satisfied.","ref":"Quran 93:5"},{"text":"Allah does not burden a soul beyond that it can bear.","ref":"Quran 2:286"},{"text":"Say, He is Allah, the One.","ref":"Quran 112:1"},{"text":"Indeed, the mercy of Allah is near to the doers of good.","ref":"Quran 7:56"},{"text":"And whoever puts his trust in Allah, He will be enough for him.","ref":"Quran 65:3"},{"text":"Be patient. Indeed, the promise of Allah is truth.","ref":"Quran 30:60"},{"text":"And He is with you wherever you are.","ref":"Quran 57:4"}]
 
 async function startBot() {
+  // DELETE THIS LINE AFTER FIRST SUCCESSFUL LOGIN
+  if (fs.existsSync('./session')) fs.rmSync('./session', { recursive: true, force: true })
+
   const { state, saveCreds } = await useMultiFileAuthState('./session')
   const sock = makeWASocket({
     auth: state,
     logger: pino({ level: 'silent' }),
-    printQRInTerminal: false,
+    printQRInTerminal: true,
     browser: ['VOID MD', 'Chrome', '3.0']
   })
 
@@ -41,64 +43,25 @@ async function startBot() {
   global.anticall = false
   global.autobio = null
 
-  // ===== PAIR CODE LOGIN - RENDER VERSION =====
-  if (!sock.authState.creds.registered) {
-    console.clear()
-    console.log('\n')
-    console.log('██╗ ██╗ ██████╗ ██╗██████╗ ███╗ ███╗██████╗ ')
-    console.log('██║ ██║██╔═══██╗██║██╔══██╗ ████║██╔══██╗')
-    console.log('██║ ██║██║██║ ██╔████╔██║██║ ██║')
-    console.log('╚██╗ ██╔╝██║ ██║██║ ██║╚██╔╝██║██║ ██║')
-    console.log(' ╚████╔╝ ╚██████╔╝██║██████╔╝ ██║ ╚═╝ ██║██████╔╝')
-    console.log(' ╚═══╝ ╚═════╝ ╚═╝╚═════╝ ╚═╝╚═════╝ ')
-    console.log('\n⚫═══════════════════════════════════════════════════════════⚫')
-    console.log('║ ║')
-    console.log('║ 🕳️ VOID MD v3.0 🕳️ ║')
-    console.log('║ ║')
-    console.log('║ Born from the void. Forged in code. ║')
-    console.log('║ 214+ Commands. Zero Limits. Pure Power. ║')
-    console.log('║ ║')
-    console.log(`║ Crafted with passion by ${global.CREATOR} ║`)
-    console.log('║ A vision turned reality. An idea turned into legend. ║')
-    console.log('║ ║')
-    console.log('║ "In darkness we find light. In void we find purpose." ║')
-    console.log('║ ║')
-    console.log('⚫═══════════════════════════════════════════════════════════⚫')
-    console.log('\n')
-
-    const code = await sock.requestPairingCode(global.PHONE_NUMBER)
-
-    console.log('\n🌌═══════════════════════════════════════════════════════════🌌')
-    console.log(`║ ║`)
-    console.log(`║ 🔑 YOUR VOID ACCESS CODE: ${code} ║`)
-    console.log(`║ ║`)
-    console.log('🌌═══════════════════════════════════════════════════════════🌌\n')
-    console.log('📱 WhatsApp → Linked Devices → Link with phone number instead')
-    console.log(`🔑 Enter this code: ${code}`)
-    console.log('⚡ Code expires in 2 minutes\n')
-    console.log('⚫ Welcome to the VOID. Welcome to the future.\n')
-  }
-
   sock.ev.on('connection.update', async (update) => {
-    const { connection, lastDisconnect } = update
+    const { connection, lastDisconnect, qr } = update
+
+    if (qr) {
+      console.log('\n⚫═══════════════════════════════════════════════════════════⚫')
+      console.log('║ 🕳️ VOID MD v3.0 - SCAN QR TO LINK 🕳️ ║')
+      console.log('⚫═══════════════════════════════════════════════════════════⚫\n')
+      console.log('📱 WhatsApp → Linked Devices → Link a device')
+      console.log('📷 Scan the QR code below:\n')
+    }
+
     if (connection === 'close') {
       const shouldReconnect = lastDisconnect?.error?.output?.statusCode!== DisconnectReason.loggedOut
       if (shouldReconnect) startBot()
     }
     if (connection === 'open') {
-      console.log('\n')
-      console.log('██╗ ██╗ ██████╗ ██╗██████╗ ███╗ ███╗██████╗ ')
-      console.log('██║ ██║██╔═══██╗██║██╔══██╗ ████║██╔══██╗')
-      console.log('██║ ██║██║██║ ██╔████╔██║██║ ██║')
-      console.log('╚██╗ ██╔╝██║ ██║██║ ██║╚██╔╝██║██║ ██║')
-      console.log(' ╚████╔╝ ╚██████╔╝██║██████╔╝ ██║ ╚═╝ ██║██████╔╝')
-      console.log(' ╚═══╝ ╚═════╝ ╚═╝╚═════╝ ╚═╝╚═════╝ ')
       console.log('\n✅═══════════════════════════════════════════════════════════✅')
-      console.log('║ ║')
       console.log(`║ VOID MD v3.0 POWERED BY ${global.CREATOR} AI - CONNECTED ║`)
-      console.log('║ ║')
       console.log('║ The void awakens. The bot lives. ║')
-      console.log('║ ║')
       console.log('✅═══════════════════════════════════════════════════════════✅\n')
       try {
         const botJid = sock.user.id.split(':')[0] + '@s.whatsapp.net'
