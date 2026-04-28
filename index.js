@@ -3,6 +3,14 @@ const { webcrypto } = require('crypto')
 global.crypto = webcrypto
 // =============================================
 
+// ===== DUMMY WEB SERVER FOR RENDER - PREVENTS PORT ERRORS =====
+const express = require('express')
+const app = express()
+const PORT = process.env.PORT || 3000
+app.get('/', (req, res) => res.send('VOID MD v3.0 is running ⚫'))
+app.listen(PORT, () => console.log(`Dummy server listening on ${PORT}`))
+// ============================================================
+
 const { default: makeWASocket, useMultiFileAuthState, DisconnectReason, downloadMediaMessage } = require('@whiskeysockets/baileys')
 const pino = require('pino')
 const fs = require('fs')
